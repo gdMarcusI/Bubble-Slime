@@ -1,0 +1,25 @@
+using UnityEngine;
+
+public class Choose : MonoBehaviour {
+
+    public static GameObject ChooseProb(GameObject[] probs)
+
+    {
+        //float Enemies = probs.Length;
+        int total = probs.Length;
+
+        int randomInt = (int)(Random.value * total);
+
+        return probs[randomInt];
+    }
+
+        public static float ChooseNumber(float[] probs)
+    {
+        //float Enemies = probs.Length;
+        int total = probs.Length;
+
+        int randomInt = (int)(Random.value * total);
+
+        return probs[randomInt];
+    }
+}
