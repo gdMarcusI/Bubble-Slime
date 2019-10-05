@@ -1,0 +1,261 @@
+using UnityEngine;
+
+public class SpawnEnemies : MonoBehaviour
+{
+
+    public GameObject enemy_one;
+    public GameObject enemy_two;
+    public GameObject enemy_three;
+    public GameObject boss_one;
+    public GameObject boss_two;
+    public GameObject boss_three;
+
+    public GameObject[] Enemies = new GameObject[1];
+
+    private bool soloBoss = false;
+    private Vector2 whereToSpawn;
+    private float spawnRate;
+    private float randX;
+    private float nextSpawn = 0.0f;
+    private int bossSpawns = 0;
+
+    // Spawn Waves
+    void Update()
+    {
+
+        if (ScoreKeeper.score <= 50)
+        {
+            spawnRate = Random.Range(.5f, 1.5f);
+        }
+
+        if (ScoreKeeper.score >= 50)
+        {
+            spawnRate = Random.Range(.25f, 1f);
+        }
+
+        if (ScoreKeeper.score >= 100)
+        {
+            Enemies[0] = enemy_two;
+            Enemies[1] = enemy_two;
+            Enemies[2] = enemy_two;
+            Enemies[3] = enemy_two;
+            Enemies[4] = enemy_two;
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_two;
+            Enemies[7] = enemy_two;
+            spawnRate = Random.Range(1.5f, 3f);
+        }
+
+        if (ScoreKeeper.score >= 200)
+        {
+            spawnRate = Random.Range(.25f, 2.5f);
+        }
+
+        if (ScoreKeeper.score >= 300)
+        {
+            Enemies[0] = enemy_one;
+            Enemies[1] = enemy_one;
+            Enemies[2] = enemy_one;
+            Enemies[3] = enemy_one;
+            Enemies[4] = enemy_one;
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_two;
+            Enemies[7] = enemy_three;
+            spawnRate = Random.Range(.25f, 1.3f);
+        }
+
+        if (ScoreKeeper.score >= 500)
+        {
+            Enemies[7] = enemy_two;
+            spawnRate = Random.Range(.25f, 1.3f);
+        }
+
+        if (ScoreKeeper.score >= 700)
+        {
+            Enemies[5] = enemy_one;
+            Enemies[6] = enemy_one;
+            Enemies[7] = enemy_one;
+            spawnRate = Random.Range(.25f, 1f);
+        }
+
+        if (ScoreKeeper.score >= 800)
+        {
+            Enemies[4] = enemy_two;
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_two;
+            Enemies[7] = enemy_three;
+            spawnRate = Random.Range(.25f, 1.2f);
+        }
+
+        if (ScoreKeeper.score >= 1200)
+        {
+            Enemies[7] = enemy_two;
+            spawnRate = Random.Range(.25f, 1f);
+        }
+
+        if (ScoreKeeper.score >= 1400)
+        {
+            Enemies[0] = enemy_two;
+            Enemies[1] = enemy_two;
+            Enemies[2] = enemy_two;
+            Enemies[3] = enemy_two;
+            spawnRate = Random.Range(.25f, 2f);
+        }
+
+        if (ScoreKeeper.score >= 1500)
+        {
+            if (bossSpawns == 0)
+            {
+                CallBoss(boss_one);
+                bossSpawns += 1;
+                soloBoss = true;
+            }
+        }
+
+        if (ScoreKeeper.score >= 2500)
+        {
+            soloBoss = false;
+            Enemies[0] = enemy_one;
+            Enemies[1] = enemy_one;
+            Enemies[2] = enemy_one;
+            Enemies[3] = enemy_one;
+            Enemies[4] = enemy_one;
+            Enemies[5] = enemy_one;
+            spawnRate = Random.Range(.25f, 1.2f);
+        }
+
+        if (ScoreKeeper.score >= 3000)
+        {
+            Enemies[4] = enemy_two;
+            Enemies[5] = enemy_two;
+        }
+
+        if (ScoreKeeper.score >= 4000)
+        {
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_two;
+            Enemies[7] = enemy_three;
+            spawnRate = Random.Range(.25f, 1f);
+        }
+
+        if (ScoreKeeper.score >= 4500)
+        {
+            Enemies[4] = enemy_one;
+            Enemies[5] = enemy_one;
+            Enemies[6] = enemy_one;
+            Enemies[7] = enemy_one;
+            spawnRate = .60f;
+
+            if (bossSpawns == 1)
+            {
+                CallBoss(boss_two);
+                bossSpawns += 1;
+            }
+        }
+
+        if (ScoreKeeper.score >= 6000)
+        {
+            Enemies[3] = enemy_two;
+            Enemies[4] = enemy_two;
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_three;
+            Enemies[7] = enemy_three;
+            spawnRate = Random.Range(.25f, 1f);
+        }
+
+        if (ScoreKeeper.score >= 8000)
+        {
+            Enemies[3] = enemy_one;
+            Enemies[4] = enemy_three;
+            Enemies[5] = enemy_three;
+            Enemies[6] = enemy_three;
+            Enemies[7] = enemy_three;
+            spawnRate = Random.Range(.50f, 1.5f);
+
+            if (bossSpawns == 2)
+            {
+                CallBoss(boss_three);
+                bossSpawns += 1;
+            }
+        }
+
+        if (ScoreKeeper.score >= 10000)
+        {
+            Enemies[3] = enemy_two;
+            Enemies[4] = enemy_two;
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_three;
+            Enemies[7] = enemy_three;
+            spawnRate = Random.Range(.25f, 1f);
+        }
+
+        if (ScoreKeeper.score >= 10500)
+        {
+            Enemies[3] = enemy_one;
+            Enemies[4] = enemy_one;
+            Enemies[5] = enemy_one;
+            Enemies[6] = enemy_one;
+            Enemies[7] = enemy_one;
+            spawnRate = .60f;
+
+            if (bossSpawns == 3)
+            {
+                CallBoss(boss_one);
+                bossSpawns += 1;
+            }
+        }
+
+        if (ScoreKeeper.score >= 11500)
+        {
+            Enemies[0] = enemy_three;
+            Enemies[1] = enemy_three;
+            Enemies[2] = enemy_three;
+            Enemies[3] = enemy_three;
+            Enemies[4] = enemy_three;
+            Enemies[5] = enemy_three;
+            Enemies[6] = enemy_three;
+            Enemies[7] = enemy_three;
+            spawnRate = 1f;
+            if (bossSpawns == 4)
+            {
+                CallBoss(boss_two);
+                bossSpawns += 1;
+            }
+        }
+
+        if (ScoreKeeper.score >= 13000)
+        {
+            Enemies[0] = enemy_one;
+            Enemies[1] = enemy_one;
+            Enemies[5] = enemy_two;
+            Enemies[6] = enemy_two;
+            Enemies[7] = enemy_two;
+            if (bossSpawns == 5)
+            {
+                CallBoss(boss_three);
+                bossSpawns += 1;
+            }
+        }
+
+        if (Time.time > nextSpawn)
+        {
+            if (!soloBoss)
+            {
+                nextSpawn = Time.time + spawnRate;
+                randX = Random.Range(-2.6f, 2.6f);
+                whereToSpawn = new Vector2(randX, transform.position.y);
+                Instantiate(Choose.ChooseProb(Enemies), whereToSpawn, Quaternion.identity);
+            }
+        }
+
+    }
+
+    void CallBoss(GameObject boss)
+    {
+        Vector2 spawnLoc = Camera.main.ViewportToWorldPoint(new Vector2(.5f, 1.2f));
+        if (GameObject.FindGameObjectsWithTag("Boss").Length <= 0)
+        {
+            Instantiate(boss, spawnLoc, Quaternion.identity);
+        }
+    }
+}
