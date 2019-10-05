@@ -1,0 +1,229 @@
+using UnityEngine;
+
+public class PlayerController: MonoBehaviour {
+    public float projectileSpeed = 8f;
+    public float superProjectileSpeed = 10f;
+    public float shotsPerSecond = 0.50f;
+    public float volume;
+    public GameObject shot;
+    public GameObject superShot;
+    public GameObject bubbleCharge;
+    public Transform shotSpawn;
+    public float nextFire;
+    public int hp = 4;
+    public float powerUpTimer;
+    public GameObject flash;
+    public AudioClip bubbleSound;
+    public AudioClip superBubbleSound;
+    public AudioClip hitSound;
+    public AudioClip fullyChagred;
+    public float charge = 0;
+    public float rightEdge;
+    public float leftEdge;
+
+    //Double click 
+    public bool one_click = false;
+    //private bool timer_running;
+    public float timer_for_double_click;
+    public float delay = .3f;
+
+    //Private objects for stuff
+    private HealthPoints healthUI;
+    private Animator p_Animator;
+
+    // Use this for initialization
+    void Start () {
+        healthUI = GameObject.Find("HealthUI").GetComponent<HealthPoints>();
+        p_Animator = gameObject.GetComponent<Animator>();
+
+        p_Animator.speed = .5f;
+        powerUpTimer = 0;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        //SUPER BUBBLE
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (!one_click)
+            {
+                //One click isn't charging
+                one_click = true;
+
+                timer_for_double_click = Time.time;
+            }
+            else
+            {
+                //Add to charge to start charging and stop firing normal bubbles
+                one_click = false;
+                charge += 1f;
+            }
+        }
+
+        //Start charging
+        if (charge > 0 && Input.GetMouseButton(0))
+        {
+            charge += 1f * Time.deltaTime;
+
+            if (charge >= 1f)
+            {
+                //Create the charging effect object
+                if (GameObject.FindGameObjectsWithTag("BubbleCharge").Length <= 0)
+                {
+                    GameObject chargeObj = Instantiate(bubbleCharge, this.transform.position, Quaternion.identity);
+                    chargeObj.transform.parent = this.transform;
+                    AudioSource.PlayClipAtPoint(fullyChagred, this.transform.position);
+                }
+            }
+            if (charge >= 1.6f)
+            {
+                charge = 1.6f;
+            }
+        } else
+        {
+            //Fire the super bubble and set charge back to 0
+            if (charge == 1.6f)
+            {
+                GameObject superBubble = Instantiate(superShot, shotSpawn.position, shotSpawn.rotation);
+                superBubble.GetComponent<Rigidbody2D>().velocity = new Vector2(0, superProjectileSpeed * Time.deltaTime);
+                AudioSource.PlayClipAtPoint(superBubbleSound, transform.position, volume);
+                charge = 0;
+            }
+            else
+            {
+                //If we aren't charging destroy the charge object
+                if (GameObject.FindGameObjectsWithTag("BubbleCharge").Length > 0)
+                {
+                     Destroy(GameObject.FindWithTag("BubbleCharge"));
+                }
+                    charge = 0;
+            }
+        }
+
+        //Reset clicks
+        if (one_click)
+        {
+            if ((Time.time - timer_for_double_click) > delay)
+            {
+                //basically if thats true its been too long and we want to reset so the next click is simply a single click and not a double click.
+                one_click = false;
+            }
+        }
+        //SUPER BUBBLE
+
+        //Call the move function
+        Move();
+    }
+
+    private void FixedUpdate()
+    {
+        shotsPerSecond -= 1 * Time.deltaTime;
+        if (shotsPerSecond <= 0)
+        {
+            Fire();
+            shotsPerSecond = .19f;
+        }
+    }
+
+    //All the collision code
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Enemy")
+        {
+            PlayerHitEffects();
+            int dmg = collision.GetComponent<InteractWithPlayer>().enemyDamage;
+            hp -= dmg;
+            healthUI.GetHealthPoints(dmg);
+            Die();
+            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        }
+
+        Projectile enemyProjectile = collision.GetComponent<Projectile>();
+        if (enemyProjectile)
+        {
+            PlayerHitEffects();
+            hp -= enemyProjectile.GetDamage();
+            healthUI.GetHealthPoints(enemyProjectile.GetDamage());
+            enemyProjectile.Hit();
+            Die();
+            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        }
+
+        PowerUpHP hpPowerUp = collision.GetComponent<PowerUpHP>();
+        if  (hpPowerUp)
+        {
+            if (hp < 4)
+            {
+                hp += 1;
+                healthUI.AddHealthPoints(1);
+            }
+        }
+
+        PowerUpBubble bubblePowerUp = collision.GetComponent<PowerUpBubble>();
+        if (bubblePowerUp)
+        {
+            powerUpTimer += 14;
+        }
+
+        BossLaser bossLaser = collision.GetComponent<BossLaser>();
+        if (bossLaser)
+        {
+            hp -= bossLaser.GetDamage();
+            healthUI.GetHealthPoints(bossLaser.GetDamage());
+            Die();
+            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        }
+    }
+
+    //Bubble firing function
+    void Fire()
+    {
+        if (charge == 0)
+        {
+            GameObject bubble = Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+            bubble.GetComponent<Rigidbody2D>().velocity = new Vector2(0, projectileSpeed * Time.deltaTime);
+
+            AudioSource.PlayClipAtPoint(bubbleSound, transform.position);
+
+            if (powerUpTimer > 0)
+            {
+                volume = .5f;
+                var shotOne = Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+                shotOne.GetComponent<Rigidbody2D>().velocity = transform.TransformDirection(new Vector3(1f, projectileSpeed * Time.deltaTime, 0));
+                AudioSource.PlayClipAtPoint(bubbleSound, transform.position, volume);
+
+                var shotTwo = Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+                shotTwo.GetComponent<Rigidbody2D>().velocity = transform.TransformDirection(new Vector3(-1f, projectileSpeed * Time.deltaTime, 0));
+                AudioSource.PlayClipAtPoint(bubbleSound, transform.position, volume);
+
+                powerUpTimer -= 1;
+            }
+        }
+    }
+
+    //Seperated movement code
+    void Move()
+    {
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 playerPosition = new Vector3(Mathf.Clamp(mousePos.x, leftEdge, rightEdge), transform.position.y, 0f);
+
+        transform.position = playerPosition;
+    }
+
+    //Seperated destruction code
+    void Die()
+    {
+        if (hp <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    //Screen shake and screen flash
+    void PlayerHitEffects()
+    {
+        Camera.main.GetComponent<CameraControl>().Shake(0.1f, 5, 2);
+        Instantiate(flash, new Vector3(0, 0, 0), Quaternion.identity);
+    }
+}
