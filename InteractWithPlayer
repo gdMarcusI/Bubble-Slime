@@ -1,0 +1,65 @@
+using UnityEngine;
+
+public class InteractWithPlayer : MonoBehaviour {
+
+    public int enemyDamage;
+    public int enemyHP;
+    public int enemyPointValue; 
+
+    public GameObject dyingEffect;
+    private ScoreKeeper scoreKeeper;
+
+    // Use this for initialization
+    void Start()
+    {
+        scoreKeeper = GameObject.Find("Score").GetComponent<ScoreKeeper>();
+    }
+
+    public void GetStats(int damage, int hp, int value)
+    {
+        enemyDamage = damage;
+        enemyHP = hp;
+        enemyPointValue = value;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+        Projectile bubble = collision.gameObject.GetComponent<Projectile>();
+        SuperBubble superBubble = collision.gameObject.GetComponent<SuperBubble>();
+        if (player)
+        {
+            Die();
+        }
+
+        if (bubble)
+        {
+            Camera.main.GetComponent<CameraControl>().Shake(0.05f, 5, 1);
+            enemyHP -= bubble.GetDamage();
+            bubble.Hit();
+            if (enemyHP <= 0)
+            {
+                Die();
+                scoreKeeper.ScorePoints(enemyPointValue);
+            }
+        }
+
+        if (superBubble)
+        {
+            Camera.main.GetComponent<CameraControl>().Shake(0.05f, 10, 2);
+            enemyHP -= superBubble.GetDamage();
+            if (enemyHP <= 0)
+            {
+                Die();
+                scoreKeeper.ScorePoints(enemyPointValue);
+                Debug.Log("Destroyed by super bubble!");
+            }
+        }
+    }
+
+    public void Die()
+    {
+        Destroy(gameObject);
+        Instantiate(dyingEffect, transform.position, Quaternion.identity);
+    }    
+}
